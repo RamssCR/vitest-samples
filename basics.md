@@ -42,3 +42,53 @@ describe('Promesas', () => {
   })
 })
 ```
+
+4. Testea modelos de Sequelize (Sin Hooks)
+```JS
+// models/role.js
+import { DataTypes } from "sequelize"
+import { sequelize } from "#config/database.config"
+
+export const Role = sequelize.define('Role', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+}, {
+  timestamps: true,
+  paranoid: true,
+  defaultScope: {
+    attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] }
+  },
+})
+```
+```JS
+// models/role.spec.js
+import { describe, expect, test, vi } from 'vitest'
+import { Role } from '#models/role'
+
+describe('Role Model', () => {
+  test('crea (pero no guarda) una instancia de Role', () => {
+    const role = Role.build({ name: 'admin' })
+    expect(role).toBeInstanceOf(Role)
+    expect(role.name).toBe('admin')
+  })
+
+  test('encuentra una lista de roles', async () => {
+    Role.findAll = vi.fn().mockResolvedValue([
+      Role.build({ name: 'admin' }),
+      Role.build({ name: 'user' }),
+    ])
+
+    const roles = await Role.findAll()
+    expect(roles).toHaveLength(2)
+    expect(roles[0].name).toBe('admin')
+    expect(roles[1].name).toBe('user')
+  })
+})
+```
