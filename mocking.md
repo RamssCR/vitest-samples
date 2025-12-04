@@ -133,3 +133,28 @@ describe('User Service - GET Queries', () => {
   })
 })
 ```
+
+6. Timers
+```JS
+import { expect, test, vi } from 'vitest'
+
+const heavyTask = () => {
+  setTimeout(() => {
+    console.log('pasaron 5 segundos')
+  }, 5000) // 5 segundos
+
+  return "termino el timer"
+}
+
+test('retorna un string pasados 5 segundos (adelantandos)', () => {
+  vi.useFakeTimers()
+
+  const result = heavyTask()
+  expect(result).not.toBe("termino el timer")
+
+  vi.advanceTimersByTime(5000) // Aqui se adelantan los 5 segundos que dura el timer.
+
+  expect(result).toBe("termino el timer")
+  vi.useRealTimers() // restablecer el timer.
+})
+```
